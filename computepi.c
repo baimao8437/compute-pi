@@ -2,6 +2,7 @@
 #include <immintrin.h>
 #include <omp.h>
 #include "computepi.h"
+#include <math.h>
 
 double compute_pi_baseline(size_t N)
 {
@@ -60,7 +61,7 @@ double compute_pi_avx_unroll(size_t N)
     double dt = 1.0 / N;
     register __m256d ymm0, ymm1, ymm2, ymm3, ymm4,
              ymm5, ymm6, ymm7, ymm8, ymm9,
-             ymm10,ymm11, ymm12, ymm13, ymm14;
+             ymm10, ymm11, ymm12, ymm13, ymm14;
     ymm0 = _mm256_set1_pd(1.0);
     ymm1 = _mm256_set1_pd(dt);
     ymm2 = _mm256_set_pd(dt * 3, dt * 2, dt * 1, 0.0);
@@ -116,4 +117,33 @@ double compute_pi_avx_unroll(size_t N)
           tmp3[0] + tmp3[1] + tmp3[2] + tmp3[3] +
           tmp4[0] + tmp4[1] + tmp4[2] + tmp4[3];
     return pi * 4.0;
+}
+
+double compute_ci(double time_data[25])
+{
+    double mean = 0.0;
+    double var = 0.0;
+    double min = 0.0;
+    double max = 0.0;
+    double result = 0.0;
+    int count = 0;
+
+    for (int i = 0; i < 25; i++)
+        mean += time_data[i];
+    mean /= (double)25;
+
+    for (int i = 0; i < 25; i++)
+        var += (time_data[i] - mean) * (time_data[i] - mean); //faster than pow
+    var = sqrt(var / (double)25);
+
+    min = mean - var * 2;
+    max = mean + var * 2;
+
+    for (int i = 0; i < 25; i++) {
+        if (time_data[i] >= min && time_data[i] <= max) {
+            result += time_data[i];
+            count++;
+        }
+    }
+    return (result / (double)count);
 }
