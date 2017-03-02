@@ -25,6 +25,22 @@ int main(int argc, char const *argv[])
 #if defined(AVXUNROLL)
     pi = compute_pi_avx_unroll(N);
 #endif
+
+#if defined(LEIBNIZ)
+    pi = compute_pi_leibniz(N);
+#endif
+
+#if defined(LEIBNIZ_AVX)
+    pi = compute_pi_leibniz_avx(N);
+#endif
+
+#if defined(NILAKANTHA)
+    pi = compute_pi_nilakantha(N);
+#endif
+
+#if defined(NILAKANTHA_AVX)
+    pi = compute_pi_nilakantha_avx(N);
+#endif
     printf("N = %d , pi = %lf\n", N, pi);
 
     return 0;

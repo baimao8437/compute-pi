@@ -64,6 +64,46 @@ int main(int argc, char const *argv[])
         time_data[i] = (double)(end.tv_sec - start.tv_sec) +
                        (end.tv_nsec - start.tv_nsec) / ONE_SEC;
     }
+    printf("%lf,", compute_ci(time_data));
+
+    // Leibniz
+    for (i = 0; i < loop; i++) {
+        clock_gettime(CLOCK_ID, &start);
+        compute_pi_leibniz(N);
+        clock_gettime(CLOCK_ID, &end);
+        time_data[i] = (double)(end.tv_sec - start.tv_sec) +
+                       (end.tv_nsec - start.tv_nsec) / ONE_SEC;
+    }
+    printf("%lf,", compute_ci(time_data));
+
+    // Leibniz avx
+    for (i = 0; i < loop; i++) {
+        clock_gettime(CLOCK_ID, &start);
+        compute_pi_leibniz_avx(N);
+        clock_gettime(CLOCK_ID, &end);
+        time_data[i] = (double)(end.tv_sec - start.tv_sec) +
+                       (end.tv_nsec - start.tv_nsec) / ONE_SEC;
+    }
+    printf("%lf,", compute_ci(time_data));
+
+    // Nilakantha
+    for (i = 0; i < loop; i++) {
+        clock_gettime(CLOCK_ID, &start);
+        compute_pi_nilakantha(N);
+        clock_gettime(CLOCK_ID, &end);
+        time_data[i] = (double)(end.tv_sec - start.tv_sec) +
+                       (end.tv_nsec - start.tv_nsec) / ONE_SEC;
+    }
+    printf("%lf,", compute_ci(time_data));
+
+    // Nilakantha
+    for (i = 0; i < loop; i++) {
+        clock_gettime(CLOCK_ID, &start);
+        compute_pi_nilakantha_avx(N);
+        clock_gettime(CLOCK_ID, &end);
+        time_data[i] = (double)(end.tv_sec - start.tv_sec) +
+                       (end.tv_nsec - start.tv_nsec) / ONE_SEC;
+    }
     printf("%lf\n", compute_ci(time_data));
 
     return 0;

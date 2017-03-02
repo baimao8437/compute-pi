@@ -26,7 +26,18 @@ int main(int argc, char const *argv[])
     printf("%lf,", diff(compute_pi_avx(N)) / M_PI);
 
     // AVX SIMD + Loop unrolling
-    printf("%lf\n", diff(compute_pi_avx_unroll(N)) / M_PI);
+    printf("%lf,", diff(compute_pi_avx_unroll(N)) / M_PI);
 
+    // Leibniz
+    printf("%lf,", diff(compute_pi_leibniz(N)) / M_PI);
+
+    // Leibniz avx
+    printf("%lf,", diff(compute_pi_leibniz_avx(N)) / M_PI);
+
+    //Nilakantha
+    printf("%lf,", diff(compute_pi_nilakantha(N)) / M_PI);
+
+    //Nilakantha avx
+    printf("%lf\n", diff(compute_pi_nilakantha_avx(N)) / M_PI);
     return 0;
 }

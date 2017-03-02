@@ -119,6 +119,82 @@ double compute_pi_avx_unroll(size_t N)
     return pi * 4.0;
 }
 
+double compute_pi_leibniz(size_t N)
+{
+    double pi = 0.0;
+    int tmp = 1;
+    for (size_t i = 0; i < N; i++) {
+        pi += ((double)tmp / (2.0 * (double)i + 1.0));
+        tmp *= -1;
+    }
+    return pi * 4.0;
+}
+
+double compute_pi_leibniz_avx(size_t N)
+{
+    double pi = 0.0;
+    register __m256d ymm0, ymm1, ymm2, ymm3, ymm4;
+    ymm0 = _mm256_set_pd(1.0, -1.0, 1.0, -1.0);//represent tmp
+    ymm1 = _mm256_set1_pd(1);
+    ymm2 = _mm256_set1_pd(2);
+    ymm4 = _mm256_setzero_pd();             // sum of pi
+
+    for (int i = 0; i <= N - 4; i += 4) {
+        ymm3 = _mm256_set_pd((double)i, (double)i + 1.0, (double)i + 2.0, (double)i + 3.0); // represent n
+        ymm3 = _mm256_mul_pd(ymm2, ymm3);   // [2*n]
+        ymm3 = _mm256_add_pd(ymm1, ymm3);   // 2*n[+1]
+        ymm3 = _mm256_div_pd(ymm0, ymm3);   // [tmp/](2*n+1)
+        ymm4 = _mm256_add_pd(ymm4, ymm3);   // pi += tmp/(2*n+1)
+    }
+    double tmp[4] __attribute__((aligned(32)));
+    _mm256_store_pd(tmp, ymm4);             // move packed float64 values to  256-bit aligned memory location
+    pi += tmp[0] + tmp[1] + tmp[2] + tmp[3];
+    return pi * 4.0;
+}
+
+double compute_pi_nilakantha(size_t N)
+{
+    double pi = 0.0;
+    int tmp = 1;
+    double start = 0.0;
+    for (size_t i = 1; i < N; i++) {
+        start = (double)i * 2.0;
+        pi += (double)tmp / ((start) * (start + 1.0) * (start + 2.0));
+        tmp *= -1;
+    }
+    pi *= 4;
+    pi += 3;
+    return pi;
+}
+
+double compute_pi_nilakantha_avx(size_t N)
+{
+    double pi = 0.0;
+    register __m256d ymm0, ymm1, ymm2, ymm3, ymm4, ymm5, ymm6;
+    ymm0 = _mm256_set_pd(1.0, -1.0, 1.0, -1.0);
+    ymm1 = _mm256_set1_pd(1);
+    ymm2 = _mm256_set1_pd(2);
+    ymm3 = _mm256_set1_pd(4);
+    ymm4 = _mm256_setzero_pd();//_mm256_set1_pd(4);
+
+    for (int i = 0; i < N - 4; i += 4) {
+        ymm6 = _mm256_set_pd((double)i + 1.0, (double)i + 2.0, (double)i + 3.0, (double)i + 4.0); //n
+        ymm6 = _mm256_mul_pd(ymm2, ymm6); //start = i*2
+        ymm5 = _mm256_add_pd(ymm6, ymm1); //(start+1)
+        ymm6 = _mm256_mul_pd(ymm6, ymm5); //start*(start+1)
+        ymm5 = _mm256_add_pd(ymm5, ymm1); //(start+2)
+        ymm6 = _mm256_mul_pd(ymm6, ymm5); //start*(start+1)*(start+2)
+        ymm6 = _mm256_div_pd(ymm3, ymm6); // 4/start*(start+1)*(start+2)
+        ymm6 = _mm256_mul_pd(ymm6, ymm0); // + - + -
+        ymm4 = _mm256_add_pd(ymm4, ymm6);
+    }
+    double tmp[4] __attribute__((aligned(32)));
+    _mm256_store_pd(tmp, ymm4);
+    pi += tmp[0] + tmp[1] + tmp[2] + tmp[3];
+    pi += 3.0;
+    return pi;
+}
+
 double compute_ci(double time_data[25])
 {
     double mean = 0.0;
